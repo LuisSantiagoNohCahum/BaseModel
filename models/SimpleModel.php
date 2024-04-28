@@ -70,7 +70,15 @@ class SimpleModel extends RecordHelper{
     }
 
     public function getById() : mixed {
-        
+        try {
+            /* 
+            * $this->select()->where([""=""]);
+            * 
+            */
+            return $this->connection->execute("SELECT * FROM {$this->table_name} where id = :id", $this->getId());
+        } catch (PDOException $ex) {
+            throw $ex;
+        }
     }
 
     public function getAll() : mixed {

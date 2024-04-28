@@ -11,12 +11,13 @@ abstract class RecordHelper implements IDbBaseModel{
     protected $table_name;
     public $isNew;
     public $isFillModel;
-    public $connection;
+    public DbConnection $connection;
 
     public function __construct() {
-        
+        $connection = new DbConnection();
     }
 
+    //empty array default to where
     public function select(array $QueryConditions = null): mixed
     {
         try {
@@ -26,9 +27,16 @@ abstract class RecordHelper implements IDbBaseModel{
         }
     }
 
+    public function where(){
+
+    }
+    
     public function insert(): int
     {
         try {
+
+            $this->connection->open();
+
             $insertValues = $this->getValues();
 
             $table_columns = array_keys($insertValues);
@@ -55,9 +63,12 @@ abstract class RecordHelper implements IDbBaseModel{
             $SQL_QUERY_INSERT = sprintf($SQL_QUERY_INSERT, $this->table_name, $ColumnsMapping, $BindingKeysMapping);
 
             try {
-                //return lastRecordInsert
-            } catch (\PDOException $th) {
-                throw $th->getMessage();
+                $this->connection->execute($SQL_QUERY_INSERT, $insertValues, true);
+                $insertId = $this->connection->conection->lastInsertId();
+                $this->connection->close();
+                return $insertId;
+            } catch (\PDOException $ex) {
+                throw $ex->getMessage();
             }
 
             return 0;
@@ -86,37 +97,7 @@ abstract class RecordHelper implements IDbBaseModel{
             throw $th->getMessage();
         }
     }
-    /**
-    * Funcion para obtener el array con las claves y valores que se van a insertar en la base de datos.
-    *
-    * @return array
-    * @throws Exception
-    */
 
-    function bindArrayValue($req, $array, $typeArray = false)
-    {
-        if (is_object($req) && ($req instanceof PDOStatement)) {
-            foreach ($array as $key => $value) {
-                if ($typeArray)
-                    $req->bindValue(":$key", $value, $typeArray[$key]);
-                else {
-                    if (is_int($value))
-                        $param = PDO::PARAM_INT;
-                    elseif (is_bool($value))
-                        $param = PDO::PARAM_BOOL;
-                    elseif (is_null($value))
-                        $param = PDO::PARAM_NULL;
-                    elseif (is_string($value))
-                        $param = PDO::PARAM_STR;
-                    else
-                        $param = FALSE;
-
-                    if ($param)
-                        $req->bindValue(":$key", $value, $param);
-                }
-            }
-        }
-    }
 
     public abstract function getId() : array;
 
