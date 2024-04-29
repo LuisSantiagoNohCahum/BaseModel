@@ -11,33 +11,38 @@ class DbConnection implements IDbBaseConnection{
 	private $pass;
 	public PDO $conection;
 
-	public function __construct() {		
-		$this->host = constant('DB_HOST');
-        $this->port = constant('PORT');
-		$this->db = constant('DB');
-		$this->user = constant('DB_USER');
-		$this->pass = constant('DB_PASS');
+    public bool $IsAlive = false;
+
+	public function __construct(Array $conectionConfig = null) {
+        $ExistCustomConfig = $conectionConfig != null && !empty($conectionConfig);
+
+        $this->host = ($ExistCustomConfig && isset($conectionConfig["DB_HOST"])) ? $conectionConfig["DB_HOST"] : constant('DB_HOST');
+        $this->port = ($ExistCustomConfig && isset($conectionConfig["PORT"])) ? $conectionConfig["PORT"] : constant('PORT');
+        $this->db = ($ExistCustomConfig && isset($conectionConfig["DB"])) ? $conectionConfig["DB"] : constant('DB');
+        $this->user = ($ExistCustomConfig && isset($conectionConfig["DB_USER"])) ? $conectionConfig["DB_USER"] : constant('DB_USER');
+        $this->pass = ($ExistCustomConfig && isset($conectionConfig["DB_PASS"])) ? $conectionConfig["DB_PASS"] : constant('DB_PASS');
 	}
 
-	public function open() : bool {
+	public function open(){
 		try {
             $this->conection = new PDO('mysql:host='.$this->host.';port='.$this->port.';dbname='.$this->db, $this->user, $this->pass);
-            return true;
+            $this->IsAlive = true;
         } catch (PDOException $e) {
-            return false;
+            $this->IsAlive = false;
+            throw new Exception($e->getMessage());
         }
 	}
 
-	public function close() : bool {
+	public function close() {
 		try {
             $this->conection = null;
-            return true;
+            $this->IsAlive = false;
         } catch (PDOException $ex) {
             throw new Exception($ex->getMessage());
         }
 	}
 
-	public function execute(String $SqlQuery, array $BindValues = null, bool $NonQuery = false, bool $AllRecords = false) : mixed {
+	public function execute(String $SqlQuery, array $BindValues = null, bool $IsNonQuery = false, bool $AllRecords = false) {
         try {
             $QueryExecute = $this->conection->prepare($SqlQuery);
             
@@ -48,14 +53,14 @@ class DbConnection implements IDbBaseConnection{
 
             /* Colocar IF para validar si se ejcuto correctamente */
             if ($QueryExecute->execute()) {
-                if(!$NonQuery)
+                if(!$IsNonQuery)
                     return ($AllRecords) ? $QueryExecute->fetchAll() : $QueryExecute->fetch();
                 else
                     return true;
+                    //$QueryExecute->rowCount();
             }else{
                 return false;
             }
-
         } catch (\Exception $ex) {
             throw new Exception($ex->getMessage());
         }

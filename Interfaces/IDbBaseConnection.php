@@ -5,11 +5,11 @@ interface IDbBaseConnection{
 
     public function getConnection() : bool; */
 
-    public function open() : bool;
+    public function open();
 
-    public function close() : bool;
+    public function close();
 
     /* (String $SqlQuery, PDO $Connection, bool $AllRecords) */
-    public function execute(String $SqlQuery, array $BindValues, bool $AllRecords) : mixed;
+    public function execute(String $SqlQuery, array $BindValues, bool $AllRecords);
 }
 ?>

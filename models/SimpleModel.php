@@ -45,6 +45,23 @@ class SimpleModel extends RecordHelper{
         ];
     }
 
+    //abstarc method
+    public function load(array $_args){
+        try {
+            //Todos los campos deben se llamados igual que en la bd tanto en los forms como en los modelos
+            if (is_null($_args)) throw new Exception("Load ::: No se cargaron los valores del objeto correctamente");
+
+            $IsValid = empty($conectionConfig);
+
+            $this->nombre = (!$IsValid && isset($args["nombre"])) ? isset($args["nombre"]) : "";
+            $this->apellido = (!$IsValid && isset($args["apellido"])) ? isset($args["apellido"]) : "";
+
+            //load default values here or in other method
+
+        } catch (\Exception $ex) {
+            throw new Exception($ex->getMessage());
+        }
+    }
     public function labels()
     {
         return [
@@ -71,10 +88,6 @@ class SimpleModel extends RecordHelper{
 
     public function getById() : mixed {
         try {
-            /* 
-            * $this->select()->where([""=""]);
-            * 
-            */
             return $this->connection->execute("SELECT * FROM {$this->table_name} where id = :id", $this->getId());
         } catch (PDOException $ex) {
             throw $ex;
