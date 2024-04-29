@@ -35,13 +35,16 @@ class DbConnection implements IDbBaseConnection{
 
 	public function close() {
 		try {
-            $this->conection = null;
-            $this->IsAlive = false;
+            if($this->IsAlive){
+                $this->conection = null;
+                $this->IsAlive = false;
+            }
         } catch (PDOException $ex) {
             throw new Exception($ex->getMessage());
         }
 	}
 
+    //añadir row count como param, si llega ese parametro y es noquery poner operador ternario como el el fetch, para retornar numero o bool
 	public function execute(String $SqlQuery, array $BindValues = null, bool $IsNonQuery = false, bool $AllRecords = false) {
         try {
             $QueryExecute = $this->conection->prepare($SqlQuery);

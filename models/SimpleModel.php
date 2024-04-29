@@ -13,7 +13,7 @@ class SimpleModel extends RecordHelper{
 
     public function __construct() {
         $this->isNew = true;
-        $this->table_name = 'Personas';
+        $this->table_name = 'personas';
         $this->initData();
     }
 
@@ -32,7 +32,6 @@ class SimpleModel extends RecordHelper{
     public function getValues() : array
     {
         return [
-            'id'=>$this->id,
             'nombre'=>$this->nombre,
             'apellido'=>$this->apellido,
         ];
@@ -53,12 +52,15 @@ class SimpleModel extends RecordHelper{
 
             $IsValid = empty($conectionConfig);
 
-            $this->nombre = (!$IsValid && isset($args["nombre"])) ? isset($args["nombre"]) : "";
-            $this->apellido = (!$IsValid && isset($args["apellido"])) ? isset($args["apellido"]) : "";
-
+            //checar id si se elimina o se queda
+            $this->id = (!$IsValid && isset($args["id"])) ? htmlspecialchars($args["id"]) : 0;
+            $this->nombre = (!$IsValid && isset($args["nombre"])) ? htmlspecialchars($args["nombre"]) : "";
+            $this->apellido = (!$IsValid && isset($args["apellido"])) ? htmlspecialchars($args["apellido"]) : "";
+            
+            $this->isFillModel = true;
             //load default values here or in other method
-
         } catch (\Exception $ex) {
+            $this->isFillModel = false;
             throw new Exception($ex->getMessage());
         }
     }
@@ -74,6 +76,8 @@ class SimpleModel extends RecordHelper{
     public function save() : int {
         try {
             //call validate (return true or false, if is false return exception)
+            if(!$this->isFillModel) throw new Exception("No se puede guardar el elemento debido a que el objeto esta vacio");
+
             if ($this->isNew) {
                 return $this->insert();
                 //insertar el nuevo id a la propiedad id y cambiar estado de isnew
@@ -86,16 +90,11 @@ class SimpleModel extends RecordHelper{
         }
     }
 
-    public function getById() : mixed {
-        try {
-            return $this->connection->execute("SELECT * FROM {$this->table_name} where id = :id", $this->getId());
-        } catch (PDOException $ex) {
-            throw $ex;
-        }
-    }
-
-    public function getAll() : mixed {
-        
+    //implements method to return all data objects for the array getall
+    public function validate() : bool
+    {
+        //verificar las propiedades por si se asignan por medio de propiedades y no por el load
+        return $this->isFillModel;
     }
 }
 ?>

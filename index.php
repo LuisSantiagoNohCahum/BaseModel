@@ -3,6 +3,7 @@ require "interfaces/IDbBaseConnection.php";
 require "models/DataBaseConectionModel.php";
 
 require "interfaces/IDbBaseModel.php";
+require "models/RecordHelper.php";
 require "models/SimpleModel.php";
     /*
     * CREAR CONEXION CON EL ConectionModel
@@ -33,7 +34,7 @@ require "models/SimpleModel.php";
     $model->delete();
 
     //buscar elemento y llenar el object con esos datos
-    $model->getById();
+    $model->getById(1);
 
     //devolver un array de objectos o array normal y asignar los valores a multiples objetos en for
     $model->getAll();
