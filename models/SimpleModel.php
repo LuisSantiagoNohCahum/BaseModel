@@ -12,6 +12,7 @@ class SimpleModel extends RecordHelper{
     public $apellido;
 
     public function __construct() {
+        parent::__construct();
         $this->isNew = true;
         $this->table_name = 'personas';
         $this->initData();
@@ -50,12 +51,14 @@ class SimpleModel extends RecordHelper{
             //Todos los campos deben se llamados igual que en la bd tanto en los forms como en los modelos
             if (is_null($_args)) throw new Exception("Load ::: No se cargaron los valores del objeto correctamente");
 
-            $IsValid = empty($conectionConfig);
+            //si esta vacio mandar exception
+            $IsEmpty = empty($_args);
 
             //checar id si se elimina o se queda
-            $this->id = (!$IsValid && isset($args["id"])) ? htmlspecialchars($args["id"]) : 0;
-            $this->nombre = (!$IsValid && isset($args["nombre"])) ? htmlspecialchars($args["nombre"]) : "";
-            $this->apellido = (!$IsValid && isset($args["apellido"])) ? htmlspecialchars($args["apellido"]) : "";
+            if(!$this->id > 0)
+                $this->id = (!$IsEmpty && isset($_args["id"])) ? htmlspecialchars($_args["id"]) : 0;
+            $this->nombre = (!$IsEmpty && isset($_args["nombre"])) ? htmlspecialchars($_args["nombre"]) : "";
+            $this->apellido = (!$IsEmpty && isset($_args["apellido"])) ? htmlspecialchars($_args["apellido"]) : "";
             
             $this->isFillModel = true;
             //load default values here or in other method
@@ -73,7 +76,7 @@ class SimpleModel extends RecordHelper{
         ];
     }
 
-    public function save() : int {
+    public function save() {
         try {
             //call validate (return true or false, if is false return exception)
             if(!$this->isFillModel) throw new Exception("No se puede guardar el elemento debido a que el objeto esta vacio");
@@ -85,8 +88,8 @@ class SimpleModel extends RecordHelper{
                 return $this->update();
             }
             
-        } catch (\Throwable $th) {
-            //throw $th;
+        } catch (\Exception $ex) {
+            throw $ex;
         }
     }
 

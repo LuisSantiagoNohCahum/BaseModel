@@ -36,7 +36,7 @@ class DbConnection implements IDbBaseConnection{
 	public function close() {
 		try {
             if($this->IsAlive){
-                $this->conection = null;
+                //$this->conection = null;
                 $this->IsAlive = false;
             }
         } catch (PDOException $ex) {
@@ -57,6 +57,7 @@ class DbConnection implements IDbBaseConnection{
             /* Colocar IF para validar si se ejcuto correctamente */
             if ($QueryExecute->execute()) {
                 if(!$IsNonQuery)
+                    //revisar FECTH_CLASS
                     return ($AllRecords) ? $QueryExecute->fetchAll() : $QueryExecute->fetch();
                 else
                     return true;

@@ -14,7 +14,7 @@ abstract class RecordHelper implements IDbBaseModel{
     public DbConnection $connection;
 
     public function __construct() {
-        $connection = new DbConnection();
+        $this->connection = new DbConnection();
     }
 
     //empty array default to where
@@ -31,7 +31,7 @@ abstract class RecordHelper implements IDbBaseModel{
 
     }
     
-    public function insert(): int
+    public function insert(): bool
     {
         try {
 
@@ -69,7 +69,8 @@ abstract class RecordHelper implements IDbBaseModel{
                 //$this->getById($insertId);
                 //or call setId($insertId);
 
-                return $insertId;
+                //return $insertId;
+                return true;
             } catch (\PDOException $ex) {
                 throw $ex;
             }
@@ -82,7 +83,7 @@ abstract class RecordHelper implements IDbBaseModel{
         
     }
 
-    public function update(): int
+    public function update(): bool
     {
         try {
             $this->connection->open();
@@ -91,7 +92,7 @@ abstract class RecordHelper implements IDbBaseModel{
 
             $table_columns = array_keys($UpdateValues);
             $table_values = array_values($UpdateValues);
-
+            echo var_dump($this->getId());
             $_identityName = array_keys($this->getId())[0];
             $_identityValue = intval(array_values($this->getId())[0]);
 
@@ -122,7 +123,7 @@ abstract class RecordHelper implements IDbBaseModel{
                 $res = $this->connection->execute($SQL_QUERY_INSERT, $UpdateValues, true);
 
                 if($res) $this->getById($_identityValue);
-                
+
                 //return rowcount
                 return $res;
             } catch (\PDOException $ex) {
@@ -192,7 +193,7 @@ abstract class RecordHelper implements IDbBaseModel{
         }
     }
 
-    public function getAll() : mixed {
+    public function getAll() {
         try {
             $this->connection->open();
 
